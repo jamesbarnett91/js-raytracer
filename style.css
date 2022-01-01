@@ -1,0 +1,23 @@
+body {
+  font-size: 15px;
+}
+
+p {
+  margin: 0 0 0.8em;
+}
+
+#output-wrapper {
+  position: relative;
+  width: 960px;
+  height: 720px;
+  margin-top: 0.5em;
+}
+
+.controls {
+  margin-top: 0.5em;
+}
+
+.slider {
+  margin-right: 0.5em;
+  width: 100%;
+}

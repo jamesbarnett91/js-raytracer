@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <div class="container grid-xl">
+      <div class="columns">
+        <div class="column col-xl-12">
+          <div id="output-wrapper" class="p-centered loading loading-lg">
+            <canvas id="render-output"></canvas>
+          </div>
+        </div>
+        <div class="column">
+          <div class="columns controls">
+            <!-- <div class="column col-12 col-xl-3">
+              <p>foo</p>
+            </div>
+            <div class="column col-12 col-xl-1 hide-xl">
+              <div class="divider"></div>
+            </div> -->
+            <div class="column col-12 col-xl-9">
+              <p>Render options</p>
+              <div class="form-group">
+                <label class="form-switch">
+                  <input id="diffuse-toggle" type="checkbox" checked>
+                  <i class="form-icon"></i> Diffuse lighting
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch">
+                  <input id="specular-toggle" type="checkbox" checked>
+                  <i class="form-icon"></i> Specular lighting
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch">
+                  <input id="shadows-toggle" type="checkbox" checked>
+                  <i class="form-icon"></i> Shadows
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch">
+                  <input id="reflections-toggle" type="checkbox" checked>
+                  <i class="form-icon"></i> Reflections
+                </label>
+              </div>
+              <button id="render" class="btn btn-primary">Render</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+   
+    <script src="./bundle.js"></script>
+  </body>
+</html>
