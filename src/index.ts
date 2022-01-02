@@ -6,8 +6,10 @@ import {Material} from './Material';
 import {RaytraceDispatcher} from './RaytraceDispatcher';
 import {RaytraceContext, RaytracerOptions} from './RaytraceContext';
 import {Vector} from './Vector';
+import {Logger} from './Logger';
 
 function render() {
+  getRenderButton().classList.add('loading');
   const dispatcher = initDispatcher(parseOptions());
   dispatcher.requestRender();
 }
@@ -49,7 +51,12 @@ function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
     options
   );
 
-  return new RaytraceDispatcher(framebuffer, context);
+  return new RaytraceDispatcher(
+    framebuffer,
+    context,
+    new Logger(),
+    onRenderComplete
+  );
 }
 
 function parseOptions(): RaytracerOptions {
@@ -65,7 +72,7 @@ function parseOptions(): RaytracerOptions {
 }
 
 function registerEventListeners() {
-  document.getElementById('render')?.addEventListener('click', render); // TODO disable once clicked
+  getRenderButton().addEventListener('click', render);
 
   const threadsSlider = getInputElement('threads');
   threadsSlider.addEventListener('input', () => {
@@ -84,6 +91,14 @@ function getDesiredThreadCount(): number {
   } else {
     return 1;
   }
+}
+
+function onRenderComplete() {
+  getRenderButton().classList.remove('loading');
+}
+
+function getRenderButton(): HTMLElement {
+  return document.getElementById('render')!;
 }
 
 function getInputElement(elementId: string) {

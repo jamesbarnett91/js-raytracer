@@ -3,13 +3,16 @@ import {Framebuffer} from './Framebuffer';
 import {RaytraceContext} from './RaytraceContext';
 import {instanceToPlain} from 'class-transformer';
 import 'reflect-metadata';
+import {Logger} from './Logger';
 
 export class RaytraceDispatcher {
   private renderStartMs: number;
   private responsesReceived = 0;
   constructor(
     readonly framebuffer: Framebuffer,
-    readonly context: RaytraceContext
+    readonly context: RaytraceContext,
+    readonly logger: Logger,
+    readonly onComplete: Function
   ) {
     this.renderStartMs = new Date().getTime();
   }
@@ -30,9 +33,7 @@ export class RaytraceDispatcher {
     rowEndIndex: number,
     context: RaytraceContext
   ) {
-    console.log(
-      `Dispatching worker for lines ${rowStartIndex} to ${rowEndIndex}`
-    );
+    this.logger.log(`Dispatching worker: rows ${rowStartIndex}-${rowEndIndex}`);
 
     const raytracer = new Worker(new URL('./Raytracer.ts', import.meta.url));
 
@@ -55,9 +56,10 @@ export class RaytraceDispatcher {
 
   private handleWorkerComplete() {
     if (++this.responsesReceived === this.context.options.numThreads) {
-      console.log(
-        `Render completed in ${new Date().getTime() - this.renderStartMs}ms`
+      this.logger.log(
+        `Raytrace completed in ${new Date().getTime() - this.renderStartMs}ms`
       );
+      this.onComplete();
     }
   }
 

@@ -25,3 +25,10 @@ p {
 .thread-slider {
   padding-left: 40px;
 }
+
+#console {
+  height: 150px;
+  width: 300px;
+  padding: 0rem;
+  white-space: pre-line;
+}
