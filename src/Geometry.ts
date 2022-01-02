@@ -1,13 +1,21 @@
+import {Type} from 'class-transformer';
 import {Colour} from './Colour';
 import {Material} from './Material';
 import {Vector} from './Vector';
 
 export class Sphere {
+  @Type(() => Vector)
+  readonly centerPoint: Vector;
+  @Type(() => Material)
+  readonly material: Material;
   constructor(
-    readonly centerPoint: Vector,
     readonly radius: number,
-    readonly material: Material
-  ) {}
+    centerPoint: Vector,
+    material: Material
+  ) {
+    this.centerPoint = centerPoint;
+    this.material = material;
+  }
 }
 
 export class Plane {

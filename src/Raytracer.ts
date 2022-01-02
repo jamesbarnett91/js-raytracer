@@ -1,9 +1,27 @@
 import {Colour} from './Colour';
-import {Framebuffer} from './Framebuffer';
 import {Plane, Sphere} from './Geometry';
-import {Light} from './Light';
 import {Material} from './Material';
+import {RaytraceContext} from './RaytraceContext';
 import {Vector} from './Vector';
+
+import {plainToInstance} from 'class-transformer';
+import 'reflect-metadata';
+
+self.onmessage = ({data}) => {
+  if (data.type === 'raytraceStart') {
+    const serialisedContext: Object = JSON.parse(data.context);
+    const context = plainToInstance(RaytraceContext, serialisedContext);
+
+    const raytracer = new Raytracer(
+      data.rowStartIndex,
+      data.rowEndIndex,
+      context
+    );
+
+    raytracer.process();
+    self.close();
+  }
+};
 
 class Ray {
   constructor(readonly origin: Vector, readonly direction: Vector) {}
@@ -22,50 +40,47 @@ class RayIntersectionResult {
   constructor(readonly geometryHit: boolean, readonly rayDistance: number) {}
 }
 
-export interface RaytracerOptions {
-  shadows: boolean;
-  diffuseLighting: boolean;
-  specularLighting: boolean;
-  reflections: boolean;
-  maxRecurseDepth: number;
-  maxDrawDistance: number;
-}
-
-export class Raytracer {
+class Raytracer {
   constructor(
-    readonly framebuffer: Framebuffer,
-    readonly fov: number,
-    readonly spheres: Sphere[],
-    readonly planes: Plane[],
-    readonly lights: Light[],
-    readonly options: RaytracerOptions
+    readonly rowStartIndex: number,
+    readonly rowEndIndex: number,
+    readonly context: RaytraceContext
   ) {}
 
-  render() {
-    const height = this.framebuffer.height;
-    const width = this.framebuffer.width;
+  process() {
+    for (let y = this.rowStartIndex; y <= this.rowEndIndex; y++) {
+      const rowResultBuffer: Colour[] = [];
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const rayX = x + 0.5 - width / 2;
-        const rayY = -(y + 0.5) + height / 2;
-        const rayZ = -height / (2 * Math.tan(this.fov / 2));
+      for (let x = 0; x < this.context.width; x++) {
+        const rayX = x + 0.5 - this.context.width / 2;
+        const rayY = -(y + 0.5) + this.context.height / 2;
+        const rayZ =
+          -this.context.height / (2 * Math.tan(this.context.fov / 2));
         const rayDirection = new Vector(rayX, rayY, rayZ).normalise();
         const ray = new Ray(new Vector(0, 0, 0), rayDirection);
 
         const pixelValue = this.raytrace(ray);
 
-        this.framebuffer.writePixelAt(x, y, pixelValue);
+        rowResultBuffer.push(pixelValue);
       }
+
+      self.postMessage({
+        type: 'raytraceResultRow',
+        resultBuffer: rowResultBuffer,
+        rowIndex: y,
+      });
     }
 
-    this.framebuffer.flush();
+    self.postMessage({type: 'raytraceComplete'});
   }
 
   private raytrace(ray: Ray, recursionDepth = 0): Colour {
     const result = this.processSceneGeometry(ray);
 
-    if (recursionDepth > this.options.maxRecurseDepth || !result.geometryHit) {
+    if (
+      recursionDepth > this.context.options.maxRecurseDepth ||
+      !result.geometryHit
+    ) {
       // No hit, show background colour
       // return new Colour(50, 178, 203);
       // return new Colour(150, 150, 150);
@@ -73,7 +88,7 @@ export class Raytracer {
     }
 
     let reflectionColour = new Colour(0, 0, 0);
-    if (this.options.reflections) {
+    if (this.context.options.reflections) {
       const reflectionDirection = this.calculateReflection(
         ray.direction,
         result.normal
@@ -101,7 +116,7 @@ export class Raytracer {
     let normal = new Vector(0, 0, 0);
     let material = new Material(new Colour(0, 0, 0), 0, 0, 0, 0);
 
-    this.spheres.forEach(sphere => {
+    this.context.spheres.forEach(sphere => {
       const result = this.intersectSphere(ray, sphere);
 
       if (result.geometryHit && result.rayDistance < geometryDistance) {
@@ -112,7 +127,7 @@ export class Raytracer {
       }
     });
 
-    this.planes.forEach(plane => {
+    this.context.planes.forEach(plane => {
       const result = this.intersectPlane(ray, plane);
 
       if (result.geometryHit && result.rayDistance < geometryDistance) {
@@ -123,7 +138,7 @@ export class Raytracer {
       }
     });
 
-    const geometryHit = geometryDistance < this.options.maxDrawDistance;
+    const geometryHit = geometryDistance < this.context.options.maxDrawDistance;
 
     return new RayTraceResult(geometryHit, hitPoint, normal, material);
   }
@@ -136,7 +151,7 @@ export class Raytracer {
     let diffuseLightIntensity = 0;
     let specularLightIntensity = 0;
 
-    this.lights.forEach(light => {
+    this.context.lights.forEach(light => {
       const lightDirection = light.position
         .subtract(result.hitPoint)
         .normalise();
@@ -163,11 +178,11 @@ export class Raytracer {
 
     let rgbVector = result.material.diffuseColour.toVector();
 
-    if (this.options.diffuseLighting) {
+    if (this.context.options.diffuseLighting) {
       rgbVector = rgbVector.multiply(diffuseLightIntensity);
     }
 
-    if (this.options.specularLighting) {
+    if (this.context.options.specularLighting) {
       const totalSpecularIntensity = new Vector(255, 255, 255)
         .multiply(specularLightIntensity)
         .multiply(result.material.specularAlbedo);
@@ -177,7 +192,7 @@ export class Raytracer {
         .add(totalSpecularIntensity);
     }
 
-    if (this.options.reflections) {
+    if (this.context.options.reflections) {
       rgbVector = rgbVector.add(
         reflectionColour.multiply(result.material.reflectionAlbedo)
       );
@@ -204,7 +219,7 @@ export class Raytracer {
     lightDistance: number,
     result: RayTraceResult
   ): boolean {
-    if (!this.options.shadows) {
+    if (!this.context.options.shadows) {
       return false;
     }
 

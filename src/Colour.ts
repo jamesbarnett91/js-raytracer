@@ -1,4 +1,5 @@
 import {Vector} from './Vector';
+import 'reflect-metadata';
 
 export class Colour extends Vector {
   constructor(readonly r: number, readonly g: number, readonly b: number) {

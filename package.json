@@ -6,7 +6,8 @@
     "lint": "gts lint",
     "fix": "gts fix",
     "buildDev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "serve": "webpack serve --mode development"
   },
   "author": "James Barnett",
   "license": "GPL-3.0",
@@ -17,6 +18,14 @@
     "ts-loader": "9.2.6",
     "webpack": "5.65.0",
     "webpack-cli": "4.9.1",
+    "webpack-dev-server": "4.7.2",
     "copy-webpack-plugin": "10.2.0"
+  },
+  "dependencies": {
+    "class-transformer": "0.5.1",
+    "reflect-metadata": "0.1.13"
+  },
+  "engines": {
+    "node": ">=10.0.0"
   }
 }
