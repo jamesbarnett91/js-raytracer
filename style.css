@@ -3,7 +3,7 @@ body {
 }
 
 p {
-  margin: 0 0 0.8em;
+  margin: 0;
 }
 
 #output-wrapper {
@@ -11,6 +11,12 @@ p {
   width: 960px;
   height: 720px;
   margin-top: 0.5em;
+}
+
+#render-output {
+  width: 960px;
+  height: 720px;
+  object-fit: contain;
 }
 
 .controls {
@@ -22,7 +28,7 @@ p {
   width: 100%;
 }
 
-.thread-slider {
+.nested-slider {
   padding-left: 40px;
 }
 

@@ -49,7 +49,7 @@ class Raytracer {
 
   process() {
     for (let y = this.rowStartIndex; y <= this.rowEndIndex; y++) {
-      const rowResultBuffer: Colour[] = [];
+      const resultBuffer = new Uint8ClampedArray(3 * this.context.width);
 
       for (let x = 0; x < this.context.width; x++) {
         const rayX = x + 0.5 - this.context.width / 2;
@@ -61,14 +61,24 @@ class Raytracer {
 
         const pixelValue = this.raytrace(ray);
 
-        rowResultBuffer.push(pixelValue);
+        const buffIdx = x * 3;
+        resultBuffer[buffIdx] = pixelValue.r;
+        resultBuffer[buffIdx + 1] = pixelValue.g;
+        resultBuffer[buffIdx + 2] = pixelValue.b;
       }
 
-      self.postMessage({
-        type: 'raytraceResultRow',
-        resultBuffer: rowResultBuffer,
-        rowIndex: y,
-      });
+      if (this.context.options.directMemoryTransfer) {
+        // prettier-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        self.postMessage({type: 'raytraceResultRow', rowIndex: y, resultBuffer: resultBuffer.buffer}, [resultBuffer.buffer]);
+      } else {
+        self.postMessage({
+          type: 'raytraceResultRow',
+          resultBuffer: resultBuffer.buffer,
+          rowIndex: y,
+        });
+      }
     }
 
     self.postMessage({type: 'raytraceComplete'});
@@ -205,7 +215,6 @@ class Raytracer {
     incidentAngle: Vector,
     surfaceNormal: Vector
   ): Vector {
-    // I - N*2.f*(I*N);
     // v2 = v1 – 2(v1.n)n https://bocilmania.com/2018/04/21/how-to-get-reflection-vector/
     return incidentAngle.subtract(
       surfaceNormal

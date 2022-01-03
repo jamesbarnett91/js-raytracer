@@ -24,6 +24,16 @@
               <div class="divider"></div>
             </div> -->
             <div class="column col-12 col-xl-9">
+              <div class="form-group">
+                <label class="form-label label-sm" for="res">Resolution</label>
+                <select id="res" class="form-select select-sm">
+                  <option value="720p" selected>720p</option>
+                  <option value="1080p">1080p</option>
+                  <option value="1440p">1440p</option>
+                  <option value="4k">4k</option>
+                  <option value="8k">8k</option>
+                </select>
+              </div>
               <p>Render options</p>
               <div class="form-group">
                 <label class="form-switch">
@@ -49,21 +59,35 @@
                   <i class="form-icon"></i> Reflections
                 </label>
               </div>
+              <p>Performance options</p>
+              <div class="form-group">
+                <label class="form-switch tooltip">
+                  <input id="buffer-draw" type="checkbox" checked>
+                  <i class="form-icon"></i> Buffer draw calls
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-switch">
+                  <input id="direct-transfer" type="checkbox" checked>
+                  <i class="form-icon"></i> Direct memory transfer
+                </label>
+              </div>
               <div class="form-group">
                 <label class="form-switch">
                   <input id="enable-threads-toggle" type="checkbox" checked>
                   <i class="form-icon"></i> Multi-threaded rendering
                 </label>
               </div>
-              <div class="form-group thread-slider">
+              <div class="form-group nested-slider">
                 <label class="form-label label-sm" for="threads">Render threads</label>
                 <!-- TODO style -->
                 <div class="input-group"> 
-                  <input id="threads" class="slider" type="range" min="2" max="16" value="2" step="2">
+                  <input id="threads" class="slider" type="range" min="2" max="12" value="2" step="2">
                   <span id="threads-value" class="input-group-addon">2</span>
                 </div>
               </div>
               <button id="render" class="btn btn-primary">Render</button>
+              <button id="view-full" class="btn btn-link">view full size</button>
               <pre class="code"><code id="console"></code></pre>
             </div>
           </div>

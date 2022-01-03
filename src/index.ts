@@ -15,8 +15,8 @@ function render() {
 }
 
 function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
-  const width = 960;
-  const height = 720;
+  const {width, height} = parseResolution();
+
   const fov = Math.PI / 3;
 
   const framebuffer = new Framebuffer(width, height);
@@ -68,11 +68,36 @@ function parseOptions(): RaytracerOptions {
     reflections: getInputElement('reflections-toggle').checked,
     maxRecurseDepth: 5,
     maxDrawDistance: 1000,
+    bufferDrawCalls: getInputElement('buffer-draw').checked,
+    directMemoryTransfer: getInputElement('direct-transfer').checked,
   };
+}
+
+function parseResolution(): {width: number; height: number} {
+  switch (getInputElement('res').value) {
+    case '720p':
+    default:
+      return {width: 960, height: 720};
+    case '1080p':
+      return {width: 1440, height: 1080};
+    case '1440p':
+      return {width: 1920, height: 1440};
+    case '4k':
+      return {width: 2880, height: 2160};
+    case '8k':
+      return {width: 5760, height: 4320};
+  }
 }
 
 function registerEventListeners() {
   getRenderButton().addEventListener('click', render);
+
+  document.getElementById('view-full')!.addEventListener('click', () => {
+    const canvas = document.getElementById(
+      'render-output'
+    ) as HTMLCanvasElement;
+    window.open()!.document.body.innerHTML = `<img src=${canvas.toDataURL()}>`;
+  });
 
   const threadsSlider = getInputElement('threads');
   threadsSlider.addEventListener('input', () => {

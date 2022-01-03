@@ -32,4 +32,6 @@ export interface RaytracerOptions {
   reflections: boolean;
   maxRecurseDepth: number;
   maxDrawDistance: number;
+  bufferDrawCalls: boolean;
+  directMemoryTransfer: boolean;
 }
