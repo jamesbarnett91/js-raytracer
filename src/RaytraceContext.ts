@@ -30,6 +30,7 @@ export interface RaytracerOptions {
   diffuseLighting: boolean;
   specularLighting: boolean;
   reflections: boolean;
+  refractions: boolean;
   maxRecurseDepth: number;
   maxDrawDistance: number;
   bufferDrawCalls: boolean;

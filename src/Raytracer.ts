@@ -1,6 +1,6 @@
 import {Colour} from './Colour';
 import {Plane, Sphere} from './Geometry';
-import {Material} from './Material';
+import {Albedo, Material} from './Material';
 import {RaytraceContext} from './RaytraceContext';
 import {Vector} from './Vector';
 
@@ -99,7 +99,7 @@ class Raytracer {
 
     let reflectionColour = new Colour(0, 0, 0);
     if (this.context.options.reflections) {
-      const reflectionDirection = this.calculateReflection(
+      const reflectionDirection = this.calculateReflectionVector(
         ray.direction,
         result.normal
       );
@@ -117,14 +117,45 @@ class Raytracer {
       );
     }
 
-    return this.processLighting(result, ray.direction, reflectionColour);
+    let refractionColour = new Colour(0, 0, 0);
+    if (this.context.options.refractions) {
+      const refractionDirection = this.calculateRefractionVector(
+        ray.direction,
+        result.normal,
+        result.material.refractiveIndex
+      );
+      let refractionOrigin: Vector;
+      if (refractionDirection.dotProduct(result.normal) < 0) {
+        refractionOrigin = result.hitPoint.subtract(
+          result.normal.multiply(0.001)
+        );
+      } else {
+        refractionOrigin = result.hitPoint.add(result.normal.multiply(0.001));
+      }
+      refractionColour = this.raytrace(
+        new Ray(refractionOrigin, refractionDirection),
+        ++recursionDepth
+      );
+    }
+
+    return this.processLighting(
+      result,
+      ray.direction,
+      reflectionColour,
+      refractionColour
+    );
   }
 
   private processSceneGeometry(ray: Ray): RayTraceResult {
     let geometryDistance = 99999;
     let hitPoint = new Vector(0, 0, 0);
     let normal = new Vector(0, 0, 0);
-    let material = new Material(new Colour(0, 0, 0), 0, 0, 0, 0);
+    let material = new Material(
+      new Colour(0, 0, 0),
+      new Albedo(0, 0, 0, 0),
+      0,
+      0
+    );
 
     this.context.spheres.forEach(sphere => {
       const result = this.intersectSphere(ray, sphere);
@@ -156,7 +187,8 @@ class Raytracer {
   private processLighting(
     result: RayTraceResult,
     direction: Vector,
-    reflectionColour: Colour
+    reflectionColour: Colour,
+    refractionColour: Colour
   ): Colour {
     let diffuseLightIntensity = 0;
     let specularLightIntensity = 0;
@@ -176,7 +208,7 @@ class Raytracer {
           Math.pow(
             Math.max(
               0,
-              this.calculateReflection(
+              this.calculateReflectionVector(
                 lightDirection,
                 result.normal
               ).dotProduct(direction)
@@ -195,23 +227,29 @@ class Raytracer {
     if (this.context.options.specularLighting) {
       const totalSpecularIntensity = new Vector(255, 255, 255)
         .multiply(specularLightIntensity)
-        .multiply(result.material.specularAlbedo);
+        .multiply(result.material.albedo.specularAlbedo);
 
       rgbVector = rgbVector
-        .multiply(result.material.diffuseAlbedo)
+        .multiply(result.material.albedo.diffuseAlbedo)
         .add(totalSpecularIntensity);
     }
 
     if (this.context.options.reflections) {
       rgbVector = rgbVector.add(
-        reflectionColour.multiply(result.material.reflectionAlbedo)
+        reflectionColour.multiply(result.material.albedo.reflectionAlbedo)
+      );
+    }
+
+    if (this.context.options.refractions) {
+      rgbVector = rgbVector.add(
+        refractionColour.multiply(result.material.albedo.refractionAlbedo)
       );
     }
 
     return Colour.fromVector(rgbVector);
   }
 
-  private calculateReflection(
+  private calculateReflectionVector(
     incidentAngle: Vector,
     surfaceNormal: Vector
   ): Vector {
@@ -221,6 +259,41 @@ class Raytracer {
         .multiply(2)
         .multiply(incidentAngle.dotProduct(surfaceNormal))
     );
+  }
+
+  private calculateRefractionVector(
+    incidentAngle: Vector,
+    surfaceNormal: Vector,
+    refractiveIndex: number
+  ): Vector {
+    // See https://en.wikipedia.org/wiki/Snell's_law#Vector_form
+    let cosIncidenceAngle = -Math.max(
+      -1,
+      Math.min(1, incidentAngle.dotProduct(surfaceNormal))
+    );
+    let n1 = 1;
+    let n2 = refractiveIndex;
+
+    let normal = surfaceNormal;
+    if (cosIncidenceAngle < 0) {
+      cosIncidenceAngle = -cosIncidenceAngle;
+      n1 = refractiveIndex;
+      n2 = 1;
+      normal = surfaceNormal.negative();
+    }
+
+    const r = n1 / n2;
+    const cosRefractedAngle = Math.sqrt(
+      1 - r * r * (1 - cosIncidenceAngle * cosIncidenceAngle)
+    );
+
+    if (cosRefractedAngle * cosRefractedAngle < 0) {
+      return new Vector(0, 0, 0);
+    } else {
+      return incidentAngle
+        .multiply(r)
+        .add(normal.multiply(r * cosIncidenceAngle - cosRefractedAngle));
+    }
   }
 
   private isShadowCast(

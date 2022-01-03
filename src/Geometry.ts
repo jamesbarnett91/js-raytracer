@@ -1,6 +1,6 @@
 import {Type} from 'class-transformer';
 import {Colour} from './Colour';
-import {Material} from './Material';
+import {Albedo, Material} from './Material';
 import {Vector} from './Vector';
 
 export class Sphere {
@@ -29,11 +29,12 @@ export class Plane {
 
   getMaterialAtPoint(x: number, z: number): Material {
     let colour: Colour;
+    // prettier-ignore
     if ((Math.round(this.checkerboardScale * x) + Math.round(this.checkerboardScale * z)) & 1) {
       colour = new Colour(15, 15, 15);
     } else {
       colour = new Colour(200, 200, 200);
     }
-    return new Material(colour, 1, 0, 0, 0);
+    return new Material(colour, new Albedo(1, 0, 0, 0), 0, 1);
   }
 }

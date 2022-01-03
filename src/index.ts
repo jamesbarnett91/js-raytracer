@@ -2,7 +2,7 @@ import {Colour} from './Colour';
 import {Framebuffer} from './Framebuffer';
 import {Plane, Sphere} from './Geometry';
 import {Light} from './Light';
-import {Material} from './Material';
+import {Albedo, Material} from './Material';
 import {RaytraceDispatcher} from './RaytraceDispatcher';
 import {RaytraceContext, RaytracerOptions} from './RaytraceContext';
 import {Vector} from './Vector';
@@ -21,14 +21,40 @@ function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
 
   const framebuffer = new Framebuffer(width, height);
 
-  const matWhite = new Material(new Colour(102, 102, 77), 0.6, 0.3, 0.1, 50);
-  const matRed = new Material(new Colour(77, 26, 26), 0.9, 0.1, 0.0, 10);
-  const matMirror = new Material(new Colour(193, 193, 193), 0.0, 10, 0.8, 1000);
-  const matGreen = new Material(new Colour(77, 255, 26), 0.3, 0.1, 0.0, 2);
+  const matWhite = new Material(
+    new Colour(102, 102, 77),
+    new Albedo(0.6, 0.3, 0.1, 0.0),
+    50,
+    1
+  );
+  const matRed = new Material(
+    new Colour(77, 26, 26),
+    new Albedo(0.9, 0.1, 0.0, 0.0),
+    10,
+    1
+  );
+  const matMirror = new Material(
+    new Colour(193, 193, 193),
+    new Albedo(0.0, 10, 0.8, 0.0),
+    1000,
+    1
+  );
+  const matGreen = new Material(
+    new Colour(77, 255, 26),
+    new Albedo(0.3, 0.1, 0.0, 0.0),
+    2,
+    1
+  );
+  const matGlass = new Material(
+    new Colour(153, 179, 204),
+    new Albedo(0.0, 0.5, 0.1, 0.8),
+    125,
+    1.5
+  );
 
   const spheres = [
     new Sphere(2, new Vector(-3, 0, -16), matWhite),
-    new Sphere(2, new Vector(-1, -1.5, -12), matGreen),
+    new Sphere(2, new Vector(-1, -1.5, -12), matGlass),
     new Sphere(3, new Vector(1.5, -0.5, -18), matRed),
     new Sphere(4, new Vector(7, 5, -18), matMirror),
   ];
@@ -66,6 +92,7 @@ function parseOptions(): RaytracerOptions {
     diffuseLighting: getInputElement('diffuse-toggle').checked,
     specularLighting: getInputElement('specular-toggle').checked,
     reflections: getInputElement('reflections-toggle').checked,
+    refractions: getInputElement('refractions-toggle').checked,
     maxRecurseDepth: 5,
     maxDrawDistance: 1000,
     bufferDrawCalls: getInputElement('buffer-draw').checked,

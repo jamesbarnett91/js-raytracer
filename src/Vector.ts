@@ -33,4 +33,8 @@ export class Vector {
   norm(): number {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
+
+  negative(): Vector {
+    return new Vector(-this.x, -this.y, -this.z);
+  }
 }
