@@ -53,7 +53,7 @@ class Raytracer {
 
       for (let x = 0; x < this.context.width; x++) {
         const rayX = x + 0.5 - this.context.width / 2;
-        const rayY = -(y + 0.5) + this.context.height / 2;
+        const rayY = -(y + 100) + this.context.height / 2;
         const rayZ =
           -this.context.height / (2 * Math.tan(this.context.fov / 2));
         const rayDirection = new Vector(rayX, rayY, rayZ).normalise();
@@ -91,10 +91,7 @@ class Raytracer {
       recursionDepth > this.context.options.maxRecurseDepth ||
       !result.geometryHit
     ) {
-      // No hit, show background colour
-      // return new Colour(50, 178, 203);
-      // return new Colour(150, 150, 150);
-      return new Colour(0, 128, 128);
+      return this.context.backgroundColour;
     }
 
     let reflectionColour = new Colour(0, 0, 0);
@@ -218,7 +215,9 @@ class Raytracer {
       }
     });
 
-    let rgbVector = result.material.diffuseColour.toVector();
+    let rgbVector = result.material.diffuseColour
+      .toVector()
+      .multiply(result.material.albedo.diffuseAlbedo);
 
     if (this.context.options.diffuseLighting) {
       rgbVector = rgbVector.multiply(diffuseLightIntensity);
@@ -229,9 +228,7 @@ class Raytracer {
         .multiply(specularLightIntensity)
         .multiply(result.material.albedo.specularAlbedo);
 
-      rgbVector = rgbVector
-        .multiply(result.material.albedo.diffuseAlbedo)
-        .add(totalSpecularIntensity);
+      rgbVector = rgbVector.add(totalSpecularIntensity);
     }
 
     if (this.context.options.reflections) {

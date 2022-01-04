@@ -3,19 +3,16 @@ body {
 }
 
 p {
-  margin: 0;
+  margin: 0 0 0.8rem;
 }
 
 #output-wrapper {
-  position: relative;
-  width: 960px;
-  height: 720px;
   margin-top: 0.5em;
 }
 
 #render-output {
-  width: 960px;
-  height: 720px;
+  width: 100%;
+  height: 65vmin;
   object-fit: contain;
 }
 
@@ -33,8 +30,18 @@ p {
 }
 
 #console {
-  height: 150px;
-  width: 300px;
-  padding: 0rem;
+  height: 120px;
+  padding: 0 0 0 1em;
   white-space: pre-line;
+}
+
+#res-label {
+  padding-bottom: 4px;
+  padding-top: 0px;
+  margin-top: -1px;
+  font-size: 15px;
+}
+
+.divider-vert {
+  padding: 0;
 }

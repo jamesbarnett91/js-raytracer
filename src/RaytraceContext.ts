@@ -1,4 +1,5 @@
 import {Type} from 'class-transformer';
+import {Colour} from './Colour';
 import {Plane, Sphere} from './Geometry';
 import {Light} from './Light';
 
@@ -9,6 +10,8 @@ export class RaytraceContext {
   readonly planes: Plane[];
   @Type(() => Light)
   readonly lights: Light[];
+  @Type(() => Colour)
+  readonly backgroundColour: Colour;
   constructor(
     readonly height: number,
     readonly width: number,
@@ -16,11 +19,13 @@ export class RaytraceContext {
     spheres: Sphere[],
     planes: Plane[],
     lights: Light[],
+    backgroundColour: Colour,
     readonly options: RaytracerOptions
   ) {
     this.spheres = spheres;
     this.planes = planes;
     this.lights = lights;
+    this.backgroundColour = backgroundColour;
   }
 }
 

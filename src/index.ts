@@ -21,50 +21,63 @@ function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
 
   const framebuffer = new Framebuffer(width, height);
 
-  const matWhite = new Material(
-    new Colour(102, 102, 77),
-    new Albedo(0.6, 0.3, 0.1, 0.0),
-    50,
+  const materialMirror = new Material(
+    new Colour(220, 220, 220),
+    new Albedo(0.1, 1, 0.8, 0.0),
+    2500,
     1
   );
-  const matRed = new Material(
-    new Colour(77, 26, 26),
-    new Albedo(0.9, 0.1, 0.0, 0.0),
-    10,
-    1
-  );
-  const matMirror = new Material(
-    new Colour(193, 193, 193),
-    new Albedo(0.0, 10, 0.8, 0.0),
-    1000,
-    1
-  );
-  const matGreen = new Material(
-    new Colour(77, 255, 26),
-    new Albedo(0.3, 0.1, 0.0, 0.0),
-    2,
-    1
-  );
-  const matGlass = new Material(
+
+  const materialGlass = new Material(
     new Colour(153, 179, 204),
     new Albedo(0.0, 0.5, 0.1, 0.8),
     125,
     1.5
   );
 
-  const spheres = [
-    new Sphere(2, new Vector(-3, 0, -16), matWhite),
-    new Sphere(2, new Vector(-1, -1.5, -12), matGlass),
-    new Sphere(3, new Vector(1.5, -0.5, -18), matRed),
-    new Sphere(4, new Vector(7, 5, -18), matMirror),
+  const spheres: Sphere[] = [
+    new Sphere(1, new Vector(-6.5, -3, -26), matteMaterial(27, 118, 255)),
+    new Sphere(1, new Vector(-14, -3, -25), matteMaterial(146, 80, 188)),
+    new Sphere(1, new Vector(-10, -3, -25), matteMaterial(0, 146, 178)),
+    new Sphere(1, new Vector(-10, -3, -20), matteMaterial(185, 18, 27)),
+    new Sphere(1, new Vector(-2.5, -3, -20), matteMaterial(115, 45, 217)),
+    new Sphere(1.5, new Vector(-10.5, -2.5, -16), materialMirror),
+    new Sphere(1, new Vector(-3, -3, -16), matteMaterial(247, 178, 173)),
+    new Sphere(1, new Vector(-6, -3, -18), matteMaterial(154, 188, 167)),
+    new Sphere(1, new Vector(-6, -3, -12), matteMaterial(96, 125, 139)),
+    new Sphere(1, new Vector(-9.5, -3, -12), matteMaterial(122, 186, 242)),
+    new Sphere(1, new Vector(0, -3, -14), matteMaterial(250, 91, 15)),
+    new Sphere(1, new Vector(-3, -3, -11), materialGlass),
+    new Sphere(1, new Vector(-1, -3, -10), matteMaterial(54, 95, 182)),
+    new Sphere(1, new Vector(-4.5, -3, -8), matteMaterial(139, 195, 74)),
+
+    new Sphere(4, new Vector(4, 0, -18), materialMirror),
+    new Sphere(1, new Vector(4, -3, -12), matteMaterial(115, 45, 217)),
+    new Sphere(1.5, new Vector(8.5, -2.5, -10), materialMirror),
+    new Sphere(1, new Vector(1, -3, -11.5), matteMaterial(255, 200, 0)),
+    new Sphere(1, new Vector(1.2, -3, -8.2), materialGlass),
+    new Sphere(1, new Vector(4, -3, -7), matteMaterial(244, 67, 54)),
+    new Sphere(1, new Vector(5.5, -3, -9.5), matteMaterial(150, 237, 137)),
+    new Sphere(1, new Vector(6.5, -3, -15), matteMaterial(14, 234, 255)),
+    new Sphere(1, new Vector(10, -3, -16), matteMaterial(171, 71, 188)),
+    new Sphere(1, new Vector(11, -3, -20), matteMaterial(190, 189, 191)),
   ];
 
-  const planes = [new Plane(-4, 10, -10, -30, 0.7)];
+  const planes = [
+    new Plane(
+      -4,
+      50,
+      40,
+      -45,
+      1.5,
+      new Colour(116, 101, 87),
+      new Colour(92, 78, 70)
+    ),
+  ];
 
   const lights = [
-    new Light(new Vector(-20, 20, 20), 1.5),
-    new Light(new Vector(30, 50, -25), 1.8),
-    new Light(new Vector(30, 20, 30), 1.7),
+    new Light(new Vector(30, 50, 40), 2.5),
+    new Light(new Vector(-20, 50, -25), 0.5),
   ];
 
   const context = new RaytraceContext(
@@ -74,6 +87,7 @@ function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
     spheres,
     planes,
     lights,
+    new Colour(221, 221, 221),
     options
   );
 
@@ -102,17 +116,19 @@ function parseOptions(): RaytracerOptions {
 
 function parseResolution(): {width: number; height: number} {
   switch (getInputElement('res').value) {
+    case '360p':
+      return {width: 640, height: 360};
+    case '480p':
+      return {width: 854, height: 480};
     case '720p':
     default:
-      return {width: 960, height: 720};
+      return {width: 1280, height: 720};
     case '1080p':
-      return {width: 1440, height: 1080};
+      return {width: 1920, height: 1080};
     case '1440p':
-      return {width: 1920, height: 1440};
+      return {width: 2560, height: 1440};
     case '4k':
-      return {width: 2880, height: 2160};
-    case '8k':
-      return {width: 5760, height: 4320};
+      return {width: 3840, height: 2160};
   }
 }
 
@@ -155,6 +171,24 @@ function getRenderButton(): HTMLElement {
 
 function getInputElement(elementId: string) {
   return document.getElementById(elementId) as HTMLInputElement;
+}
+
+function matteMaterial(r: number, g: number, b: number): Material {
+  return new Material(
+    new Colour(r, g, b),
+    new Albedo(0.4, 0.0, 0.0, 0.0),
+    0,
+    1
+  );
+}
+
+function glossMaterial(r: number, g: number, b: number): Material {
+  return new Material(
+    new Colour(r, g, b),
+    new Albedo(0.4, 0.1, 0.05, 0),
+    250,
+    1
+  );
 }
 
 document.addEventListener('DOMContentLoaded', () => {
