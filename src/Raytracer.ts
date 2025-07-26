@@ -6,20 +6,14 @@ import {Vector} from './models/Vector';
 
 import {plainToInstance} from 'class-transformer';
 import 'reflect-metadata';
+import {FrameChunk} from "./models/FrameChunk";
 
 self.onmessage = ({data}) => {
   if (data.type === 'raytraceStart') {
     const serialisedContext: Object = JSON.parse(data.context);
     const context = plainToInstance(RaytraceContext, serialisedContext);
 
-    const raytracer = new Raytracer(
-      data.chunkIndex,
-      data.chunk.xStart,
-      data.chunk.yStart,
-      data.chunk.width,
-      data.chunk.height,
-      context
-    );
+    const raytracer = new Raytracer(data.chunk, context);
 
     raytracer.process();
   }
@@ -44,22 +38,18 @@ class RayIntersectionResult {
 
 class Raytracer {
   constructor(
-    readonly chunkIndex: number,
-    readonly xStart: number,
-    readonly yStart: number,
-    readonly width: number,
-    readonly height: number,
+    readonly chunk: FrameChunk,
     readonly context: RaytraceContext
   ) {}
 
   process() {
-    const resultBuffer = new Uint8ClampedArray(3 * this.width * this.height);
+    const resultBuffer = new Uint8ClampedArray(3 * this.chunk.width * this.chunk.height);
 
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
+    for (let y = 0; y < this.chunk.height; y++) {
+      for (let x = 0; x < this.chunk.width; x++) {
 
-        const rayX = x + this.xStart + 0.5 - this.context.width / 2;
-        const rayY = -(y+this.yStart + 100) + this.context.height / 2;
+        const rayX = x + this.chunk.xStart + 0.5 - this.context.width / 2;
+        const rayY = -(y+this.chunk.yStart + 100) + this.context.height / 2;
         const rayZ =
           -this.context.height / (2 * Math.tan(this.context.fov / 2));
         const rayDirection = new Vector(rayX, rayY, rayZ).normalise();
@@ -67,7 +57,7 @@ class Raytracer {
 
         const pixelValue = this.raytrace(ray);
 
-        const buffIdx = (x * 3) + ((this.width *3) * y);
+        const buffIdx = (x * 3) + ((this.chunk.width *3) * y);
         resultBuffer[buffIdx] = pixelValue.r;
         resultBuffer[buffIdx + 1] = pixelValue.g;
         resultBuffer[buffIdx + 2] = pixelValue.b;
@@ -78,11 +68,10 @@ class Raytracer {
       // prettier-ignore
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      self.postMessage({type: 'raytraceComplete', chunkIndex: this.chunkIndex, resultBuffer: resultBuffer.buffer}, [resultBuffer.buffer]);
+      self.postMessage({chunk: this.chunk, resultBuffer: resultBuffer.buffer}, [resultBuffer.buffer]);
     } else {
       self.postMessage({
-        type: 'raytraceComplete',
-        chunkIndex: this.chunkIndex,
+        chunk: this.chunk,
         resultBuffer: resultBuffer.buffer
       });
     }

@@ -38,6 +38,13 @@ export interface RaytracerOptions {
   refractions: boolean;
   maxRecurseDepth: number;
   maxDrawDistance: number;
-  bufferDrawCalls: boolean;
   directMemoryTransfer: boolean;
+  chunkAllocationMode: ChunkAllocationMode;
+}
+
+export enum ChunkAllocationMode {
+  SEQUENTIAL,
+  RANDOM,
+  CENTER_TO_EDGE,
+  EDGE_TO_CENTER
 }

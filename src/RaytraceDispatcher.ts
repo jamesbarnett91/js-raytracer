@@ -1,5 +1,5 @@
 import {Framebuffer} from './Framebuffer';
-import {RaytraceContext} from './models/RaytraceContext';
+import {ChunkAllocationMode, RaytraceContext} from './models/RaytraceContext';
 import {instanceToPlain} from 'class-transformer';
 import 'reflect-metadata';
 import {Logger} from './Logger';
@@ -9,9 +9,8 @@ import {Colour} from "./models/Colour";
 export class RaytraceDispatcher {
   private readonly renderStartMs: number;
   private readonly contextJson: String;
-  private readonly chunks: FrameChunk[];
+  private readonly chunkQueue: FrameChunk[];
   private readonly raytraceWorkers: Worker[];
-  private nextChunkIndex = 0;
   private completedWorkers = 0;
   private chunkBorderWidth = 1;
 
@@ -23,7 +22,7 @@ export class RaytraceDispatcher {
   ) {
     this.renderStartMs = new Date().getTime();
     this.contextJson = JSON.stringify(instanceToPlain(context))
-    this.chunks = [];
+    this.chunkQueue = [];
     this.raytraceWorkers = [];
   }
 
@@ -43,15 +42,15 @@ export class RaytraceDispatcher {
     // Process scene into chunks
     for (let y = 0; y < this.context.height; y+= chunkHeight) {
       for (let x = 0 ; x < this.context.width; x+= chunkWidth) {
-        this.chunks.push(new FrameChunk(x, y, chunkWidth, chunkHeight));
+        this.chunkQueue.push(new FrameChunk(x, y, chunkWidth, chunkHeight));
       }
     }
-    this.logger.log(`Scene split into ${this.chunks.length} chunks of ${chunkWidth}x${chunkHeight}`);
+    this.logger.log(`Scene split into ${this.chunkQueue.length} chunks of ${chunkWidth}x${chunkHeight}`);
 
     // Spawn worker threads
     for (let n = 0; n < this.context.options.numThreads; n++) {
       const worker = new Worker(new URL('./Raytracer.ts', import.meta.url));
-      worker.onmessage = (event) => { this.onMessageHandler(worker, event) };
+      worker.onmessage = (event) => { this.processRaytraceWorkerResult(worker, event) };
       this.raytraceWorkers.push(worker);
     }
     this.logger.log(`Spawned ${this.context.options.numThreads} render threads`);
@@ -63,24 +62,33 @@ export class RaytraceDispatcher {
   }
 
   private raytraceNextChunk(worker: Worker) {
-    const chunkIndex = this.nextChunkIndex++;
-    let chunk = this.chunks[chunkIndex];
+    const chunk = this.getNextChunk();
     this.drawChunkBorder(chunk, this.chunkBorderWidth);
     worker.postMessage({
       type: 'raytraceStart',
       chunk: chunk,
-      chunkIndex: chunkIndex,
       context: this.contextJson,
     });
   }
 
-  private onMessageHandler(worker: Worker, message: MessageEvent) {
-    if (message.data.type === 'raytraceComplete') {
-      this.writeChunkToFramebuffer(message.data.chunkIndex, message.data.resultBuffer);
+  private getNextChunk(): FrameChunk {
+    switch(this.context.options.chunkAllocationMode) {
+      case ChunkAllocationMode.SEQUENTIAL:
+        return this.getNextChunkSequential();
+      case ChunkAllocationMode.RANDOM:
+        return this.getNextChunkRandom();
+      case ChunkAllocationMode.CENTER_TO_EDGE:
+        return this.getNextChunkCenterToEdge();
+      case ChunkAllocationMode.EDGE_TO_CENTER:
+        return this.getNextChunkEdgeToCenter();
     }
+  }
+
+  private processRaytraceWorkerResult(worker: Worker, message: MessageEvent) {
+    this.writeChunkToFramebuffer(message.data.chunk, message.data.resultBuffer);
 
     // Queue next work if available
-    if (this.nextChunkIndex < this.chunks.length) {
+    if (this.chunkQueue.length > 0) {
       this.raytraceNextChunk(worker);
     } else {
       worker.terminate();
@@ -93,9 +101,34 @@ export class RaytraceDispatcher {
     }
   }
 
-  private writeChunkToFramebuffer(chunkIndex: number, data: ArrayBuffer) {
+  private getNextChunkSequential(): FrameChunk {
+    return this.chunkQueue.shift()!;
+  }
+
+  private getNextChunkRandom(): FrameChunk {
+    const index = Math.floor(Math.random() * this.chunkQueue.length);
+    const chunk = this.chunkQueue[index];
+    this.chunkQueue.splice(index, 1);
+    return chunk
+  }
+
+  private getNextChunkCenterToEdge(): FrameChunk {
+    const index = Math.floor((this.chunkQueue.length - 1) / 2);
+    const chunk = this.chunkQueue[index];
+    this.chunkQueue.splice(index, 1);
+    return chunk;
+  }
+
+  private getNextChunkEdgeToCenter(): FrameChunk {
+    if (this.chunkQueue.length % 2 == 0) {
+      return this.chunkQueue.shift()!;
+    } else {
+      return this.chunkQueue.pop()!;
+    }
+  }
+
+  private writeChunkToFramebuffer(chunk: FrameChunk, data: ArrayBuffer) {
     const clampedRowData = new Uint8ClampedArray(data);
-    const chunk = this.chunks[chunkIndex];
 
     for (let y = 0; y < chunk.height; y++) {
       for (let x = 0; x < chunk.width; x++) {

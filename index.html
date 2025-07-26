@@ -63,12 +63,6 @@
               <span>Performance options</span>
               <div class="form-group">
                 <label class="form-switch">
-                  <input id="buffer-draw" type="checkbox" checked>
-                  <i class="form-icon"></i> Buffer draw calls
-                </label>
-              </div>
-              <div class="form-group">
-                <label class="form-switch">
                   <input id="direct-transfer" type="checkbox" checked>
                   <i class="form-icon"></i> Zero-copy array transfer
                 </label>
@@ -86,6 +80,17 @@
                   <input id="threads" class="slider" type="range" min="2" max="32" value="4" step="2">
                   <span id="threads-value" class="input-group-addon">4</span>
                 </div>
+              </div>
+              <div class="form-group">
+                <label class="form-group">
+                  <label id="chunk-allocation-mode-label" class="form-label label-sm" for="res">Chunk allocation mode</label>
+                  <select id="chunk-allocation-mode" class="form-select select-sm">
+                    <option value="SEQUENTIAL" selected>Sequential</option>
+                    <option value="RANDOM">Random</option>
+                    <option value="CENTER_TO_EDGE">Center to edge</option>
+                    <option value="EDGE_TO_CENTER">Edge to center</option>
+                  </select>
+                </label>
               </div>
             </div>
             <div class="column col-4">

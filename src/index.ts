@@ -4,7 +4,7 @@ import {Plane, Sphere} from './models/Geometry';
 import {Light} from './models/Light';
 import {Albedo, Material} from './models/Material';
 import {RaytraceDispatcher} from './RaytraceDispatcher';
-import {RaytraceContext, RaytracerOptions} from './models/RaytraceContext';
+import {ChunkAllocationMode, RaytraceContext, RaytracerOptions} from './models/RaytraceContext';
 import {Vector} from './models/Vector';
 import {Logger} from './Logger';
 
@@ -109,8 +109,8 @@ function parseOptions(): RaytracerOptions {
     refractions: getInputElement('refractions-toggle').checked,
     maxRecurseDepth: 5,
     maxDrawDistance: 1000,
-    bufferDrawCalls: getInputElement('buffer-draw').checked,
     directMemoryTransfer: getInputElement('direct-transfer').checked,
+    chunkAllocationMode: getChunkAllocationMode()
   };
 }
 
@@ -129,6 +129,20 @@ function parseResolution(): {width: number; height: number} {
       return {width: 2560, height: 1440};
     case '4k':
       return {width: 3840, height: 2160};
+  }
+}
+
+function getChunkAllocationMode(): ChunkAllocationMode {
+  switch (getInputElement('chunk-allocation-mode').value) {
+    case 'SEQUENTIAL':
+    default:
+      return ChunkAllocationMode.SEQUENTIAL;
+    case 'RANDOM':
+      return ChunkAllocationMode.RANDOM
+    case 'CENTER_TO_EDGE':
+      return ChunkAllocationMode.CENTER_TO_EDGE
+    case 'EDGE_TO_CENTER':
+      return ChunkAllocationMode.EDGE_TO_CENTER
   }
 }
 
