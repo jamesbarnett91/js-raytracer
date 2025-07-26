@@ -1,3 +1,5 @@
+import {Colour} from "./models/Colour";
+
 export class Framebuffer {
   readonly width: number;
   readonly height: number;
@@ -22,11 +24,11 @@ export class Framebuffer {
     );
   }
 
-  writePixelAt(x: number, y: number, r: number, g: number, b: number) {
+  writePixelAt(x: number, y: number, colour: Colour) {
     const startIdx = (y * this.width + x) * 4;
-    this.canvasImageData.data[startIdx] = r;
-    this.canvasImageData.data[startIdx + 1] = g;
-    this.canvasImageData.data[startIdx + 2] = b;
+    this.canvasImageData.data[startIdx] = colour.r;
+    this.canvasImageData.data[startIdx + 1] = colour.g;
+    this.canvasImageData.data[startIdx + 2] = colour.b;
     this.canvasImageData.data[startIdx + 3] = 255; // No A
   }
 

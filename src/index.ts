@@ -1,11 +1,11 @@
-import {Colour} from './Colour';
+import {Colour} from './models/Colour';
 import {Framebuffer} from './Framebuffer';
-import {Plane, Sphere} from './Geometry';
-import {Light} from './Light';
-import {Albedo, Material} from './Material';
+import {Plane, Sphere} from './models/Geometry';
+import {Light} from './models/Light';
+import {Albedo, Material} from './models/Material';
 import {RaytraceDispatcher} from './RaytraceDispatcher';
-import {RaytraceContext, RaytracerOptions} from './RaytraceContext';
-import {Vector} from './Vector';
+import {RaytraceContext, RaytracerOptions} from './models/RaytraceContext';
+import {Vector} from './models/Vector';
 import {Logger} from './Logger';
 
 function render() {
@@ -41,7 +41,7 @@ function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
     new Sphere(1, new Vector(-10, -3, -25), matteMaterial(0, 146, 178)),
     new Sphere(1, new Vector(-10, -3, -20), matteMaterial(185, 18, 27)),
     new Sphere(1, new Vector(-2.5, -3, -20), matteMaterial(115, 45, 217)),
-    new Sphere(1.5, new Vector(-10.5, -2.5, -16), materialMirror),
+    new Sphere(2, new Vector(-10.5, -2, -16), materialMirror),
     new Sphere(1, new Vector(-3, -3, -16), matteMaterial(247, 178, 173)),
     new Sphere(1, new Vector(-6, -3, -18), matteMaterial(154, 188, 167)),
     new Sphere(1, new Vector(-6, -3, -12), matteMaterial(96, 125, 139)),
@@ -119,7 +119,7 @@ function parseResolution(): {width: number; height: number} {
     case '360p':
       return {width: 640, height: 360};
     case '480p':
-      return {width: 854, height: 480};
+      return {width: 832, height: 480};
     case '720p':
     default:
       return {width: 1280, height: 720};

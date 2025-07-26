@@ -1,8 +1,8 @@
-import {Colour} from './Colour';
-import {Plane, Sphere} from './Geometry';
-import {Albedo, Material} from './Material';
-import {RaytraceContext} from './RaytraceContext';
-import {Vector} from './Vector';
+import {Colour} from './models/Colour';
+import {Plane, Sphere} from './models/Geometry';
+import {Albedo, Material} from './models/Material';
+import {RaytraceContext} from './models/RaytraceContext';
+import {Vector} from './models/Vector';
 
 import {plainToInstance} from 'class-transformer';
 import 'reflect-metadata';
@@ -13,13 +13,15 @@ self.onmessage = ({data}) => {
     const context = plainToInstance(RaytraceContext, serialisedContext);
 
     const raytracer = new Raytracer(
-      data.rowStartIndex,
-      data.rowEndIndex,
+      data.chunkIndex,
+      data.chunk.xStart,
+      data.chunk.yStart,
+      data.chunk.width,
+      data.chunk.height,
       context
     );
 
     raytracer.process();
-    self.close();
   }
 };
 
@@ -42,18 +44,22 @@ class RayIntersectionResult {
 
 class Raytracer {
   constructor(
-    readonly rowStartIndex: number,
-    readonly rowEndIndex: number,
+    readonly chunkIndex: number,
+    readonly xStart: number,
+    readonly yStart: number,
+    readonly width: number,
+    readonly height: number,
     readonly context: RaytraceContext
   ) {}
 
   process() {
-    for (let y = this.rowStartIndex; y <= this.rowEndIndex; y++) {
-      const resultBuffer = new Uint8ClampedArray(3 * this.context.width);
+    const resultBuffer = new Uint8ClampedArray(3 * this.width * this.height);
 
-      for (let x = 0; x < this.context.width; x++) {
-        const rayX = x + 0.5 - this.context.width / 2;
-        const rayY = -(y + 100) + this.context.height / 2;
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+
+        const rayX = x + this.xStart + 0.5 - this.context.width / 2;
+        const rayY = -(y+this.yStart + 100) + this.context.height / 2;
         const rayZ =
           -this.context.height / (2 * Math.tan(this.context.fov / 2));
         const rayDirection = new Vector(rayX, rayY, rayZ).normalise();
@@ -61,27 +67,25 @@ class Raytracer {
 
         const pixelValue = this.raytrace(ray);
 
-        const buffIdx = x * 3;
+        const buffIdx = (x * 3) + ((this.width *3) * y);
         resultBuffer[buffIdx] = pixelValue.r;
         resultBuffer[buffIdx + 1] = pixelValue.g;
         resultBuffer[buffIdx + 2] = pixelValue.b;
       }
-
-      if (this.context.options.directMemoryTransfer) {
-        // prettier-ignore
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        self.postMessage({type: 'raytraceResultRow', rowIndex: y, resultBuffer: resultBuffer.buffer}, [resultBuffer.buffer]);
-      } else {
-        self.postMessage({
-          type: 'raytraceResultRow',
-          resultBuffer: resultBuffer.buffer,
-          rowIndex: y,
-        });
-      }
     }
 
-    self.postMessage({type: 'raytraceComplete'});
+    if (this.context.options.directMemoryTransfer) {
+      // prettier-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      self.postMessage({type: 'raytraceComplete', chunkIndex: this.chunkIndex, resultBuffer: resultBuffer.buffer}, [resultBuffer.buffer]);
+    } else {
+      self.postMessage({
+        type: 'raytraceComplete',
+        chunkIndex: this.chunkIndex,
+        resultBuffer: resultBuffer.buffer
+      });
+    }
   }
 
   private raytrace(ray: Ray, recursionDepth = 0): Colour {
