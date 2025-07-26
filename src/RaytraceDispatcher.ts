@@ -12,7 +12,6 @@ export class RaytraceDispatcher {
   private readonly chunkQueue: FrameChunk[];
   private readonly raytraceWorkers: Worker[];
   private completedWorkers = 0;
-  private chunkBorderWidth = 1;
 
   constructor(
     readonly framebuffer: Framebuffer,
@@ -27,25 +26,14 @@ export class RaytraceDispatcher {
   }
 
   requestRender() {
-    let chunkHeight, chunkWidth;
-
-    if (this.context.height <= 720) {
-      chunkHeight = 64;
-      chunkWidth = 64;
-      this.chunkBorderWidth = 2;
-    } else {
-      chunkHeight = 128;
-      chunkWidth = 128;
-      this.chunkBorderWidth = 5;
-    }
-
     // Process scene into chunks
-    for (let y = 0; y < this.context.height; y+= chunkHeight) {
-      for (let x = 0 ; x < this.context.width; x+= chunkWidth) {
-        this.chunkQueue.push(new FrameChunk(x, y, chunkWidth, chunkHeight));
+    const chunkSize = this.getChunkSize();
+    for (let y = 0; y < this.context.height; y+= chunkSize) {
+      for (let x = 0 ; x < this.context.width; x+= chunkSize) {
+        this.chunkQueue.push(new FrameChunk(x, y, chunkSize, chunkSize));
       }
     }
-    this.logger.log(`Scene split into ${this.chunkQueue.length} chunks of ${chunkWidth}x${chunkHeight}`);
+    this.logger.log(`Scene split into ${this.chunkQueue.length} chunks of ${chunkSize}x${chunkSize}`);
 
     // Spawn worker threads
     for (let n = 0; n < this.context.options.numThreads; n++) {
@@ -61,9 +49,15 @@ export class RaytraceDispatcher {
     }
   }
 
+  public stopRender() {
+    for (let worker of this.raytraceWorkers) {
+      worker.terminate();
+    }
+  }
+
   private raytraceNextChunk(worker: Worker) {
     const chunk = this.getNextChunk();
-    this.drawChunkBorder(chunk, this.chunkBorderWidth);
+    this.drawChunkBorder(chunk);
     worker.postMessage({
       type: 'raytraceStart',
       chunk: chunk,
@@ -145,9 +139,16 @@ export class RaytraceDispatcher {
     this.framebuffer.flush();
   }
 
-  private drawChunkBorder(chunk: FrameChunk, borderWidth: number) {
+  private drawChunkBorder(chunk: FrameChunk) {
     const width = chunk.width;
     const height = chunk.height;
+
+    let borderWidth = 0;
+    if (this.context.height <= 720) {
+      borderWidth = 2;
+    } else {
+      borderWidth = 5;
+    }
 
     const borderColour = new Colour(220, 128, 128);
     const unrenderedAreaColour = new Colour(160, 160, 160);
@@ -165,5 +166,18 @@ export class RaytraceDispatcher {
     }
 
     this.framebuffer.flush();
+  }
+
+  private getChunkSize(): number {
+    if (this.context.options.chunkSize === 0) {
+      // Auto sizing based on scene height
+      if (this.context.height <= 720) {
+        return 64;
+      } else {
+        return 128;
+      }
+    } else {
+      return this.context.options.chunkSize;
+    }
   }
 }

@@ -39,6 +39,7 @@ export interface RaytracerOptions {
   maxRecurseDepth: number;
   maxDrawDistance: number;
   directMemoryTransfer: boolean;
+  chunkSize: number;
   chunkAllocationMode: ChunkAllocationMode;
 }
 

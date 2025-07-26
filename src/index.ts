@@ -8,10 +8,19 @@ import {ChunkAllocationMode, RaytraceContext, RaytracerOptions} from './models/R
 import {Vector} from './models/Vector';
 import {Logger} from './Logger';
 
+let dispatcher: RaytraceDispatcher;
+
 function render() {
   getRenderButton().classList.add('loading');
-  const dispatcher = initDispatcher(parseOptions());
+  getStopRenderButton().classList.remove('d-hide');
+  getViewFullButton().classList.add('d-hide');
+  dispatcher = initDispatcher(parseOptions());
   dispatcher.requestRender();
+}
+
+function stopRender() {
+  dispatcher.stopRender();
+  onRenderComplete();
 }
 
 function initDispatcher(options: RaytracerOptions): RaytraceDispatcher {
@@ -110,6 +119,7 @@ function parseOptions(): RaytracerOptions {
     maxRecurseDepth: 5,
     maxDrawDistance: 1000,
     directMemoryTransfer: getInputElement('direct-transfer').checked,
+    chunkSize: parseInt(getInputElement('chunk-size').value, 10),
     chunkAllocationMode: getChunkAllocationMode()
   };
 }
@@ -148,8 +158,9 @@ function getChunkAllocationMode(): ChunkAllocationMode {
 
 function registerEventListeners() {
   getRenderButton().addEventListener('click', render);
+  getStopRenderButton().addEventListener('click', stopRender);
 
-  document.getElementById('view-full')!.addEventListener('click', () => {
+  getViewFullButton().addEventListener('click', () => {
     const canvas = document.getElementById(
       'render-output'
     ) as HTMLCanvasElement;
@@ -177,10 +188,20 @@ function getDesiredThreadCount(): number {
 
 function onRenderComplete() {
   getRenderButton().classList.remove('loading');
+  getStopRenderButton().classList.add('d-hide');
+  getViewFullButton().classList.remove('d-hide');
 }
 
 function getRenderButton(): HTMLElement {
   return document.getElementById('render')!;
+}
+
+function getStopRenderButton(): HTMLElement {
+  return document.getElementById('stop-render')!;
+}
+
+function getViewFullButton(): HTMLElement {
+  return document.getElementById('view-full')!;
 }
 
 function getInputElement(elementId: string) {
