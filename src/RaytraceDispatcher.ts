@@ -90,8 +90,13 @@ export class RaytraceDispatcher {
     }
 
     if (this.completedWorkers == this.context.options.numThreads) {
-      this.onComplete();
-      this.logger.log(`Raytrace completed in ${new Date().getTime() - this.renderStartMs}ms\n`);
+      const renderTimeMs = (new Date().getTime() - this.renderStartMs);
+
+      this.logger.log(`Raytrace completed in ${renderTimeMs}ms\n`);
+
+      const pixels = this.context.width * this.context.height;
+      const score = Math.round(pixels/renderTimeMs);
+      this.onComplete(score);
     }
   }
 

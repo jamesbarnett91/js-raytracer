@@ -1,10 +1,9 @@
 export class Logger {
-  constructor() {}
+  constructor(readonly element: HTMLElement) {}
 
   log(message: string) {
-    const elem = document.getElementById('console')!;
-    elem.innerText += `${message}\n`;
-    elem.scrollTop = elem.scrollHeight;
+    this.element.innerText += `${message}\n`;
+    this.element.scrollTop = this.element.scrollHeight;
     console.log(message);
   }
 }
