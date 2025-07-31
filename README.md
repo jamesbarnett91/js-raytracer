@@ -10,6 +10,16 @@ No graphics APIs or libraries are used, only a single HTML5 canvas call to draw 
 Various effects are supported, including recursive optical reflections and refractions, and [Phong shading](https://en.wikipedia.org/wiki/Phong_reflection_model). 
 Basic multi-threading is implemented using the [Web Workers API](https://developer.mozilla.org/en-US/docs/Web/API/).
 
+## Benchmarking
+The raytracer can also be used as a basic CPU performance benchmarking tool.
+
+This will test the JavaScript execution performance of your CPU and web browser, and provide a raytracing throughput score in pixels per millisecond.
+
+I've run the benchmark on various different devices I have access to, which provide some reference scores for comparison.
+View them on the [benchmarking page](https://jamesbarnett.io/raytracer#benchmark) and try your own device to see how it compares.
+
+The JavaScript execution engine your browser used will influence the results. The reference benchmark scores were all run in V8 (Chromium), as unfortunately SpiderMonkey (Firefox) seems to be considerably slower, at least at this specific task.
+
 ## Building locally
 You will need NodeJS >= 10.
 
