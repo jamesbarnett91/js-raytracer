@@ -1,6 +1,17 @@
-import * as echarts from 'echarts';
-import {EChartsOption, EChartsType} from "echarts";
+import * as echarts from 'echarts/core';
+import {EChartsOption} from "echarts";
+import { CanvasRenderer } from 'echarts/renderers';
+import { BarChart } from 'echarts/charts';
+import { GridComponent, LegendComponent, DatasetComponent} from 'echarts/components';
+echarts.use([
+  BarChart,
+  CanvasRenderer,
+  GridComponent,
+  LegendComponent,
+  DatasetComponent
+]);
 
+type EChartsType = ReturnType<typeof echarts.init>;
 let scoreChart: EChartsType;
 const userDeviceLabel = 'Your device';
 
