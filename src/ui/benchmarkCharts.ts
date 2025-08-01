@@ -48,10 +48,14 @@ const option: EChartsOption = {
         usersDevice: {
           color: "#5755d9",
           fontWeight: "bold",
-          fontSize: "14px"
+          fontSize: 20
         },
       },
+      fontSize: 16
     },
+    axisTick: {
+      length: 20
+    }
   },
   series: [
     {
@@ -74,16 +78,22 @@ const option: EChartsOption = {
   grid: {
     left: '0%',
     top: '5%',
+    bottom: '5%',
     containLabel: true
   },
   color: [
     '#5755d9',
     '#f1f1fc'
   ],
+  backgroundColor: "#0a0a0a",
+  textStyle: {
+    fontSize: 16,
+    fontFamily: "tamzen"
+  },
 }
 
 export function initScoreChart(dom: HTMLElement) {
-  scoreChart = echarts.init(dom);
+  scoreChart = echarts.init(dom, 'dark');
   scoreChart.setOption(option);
 
   window.addEventListener('resize', function() {

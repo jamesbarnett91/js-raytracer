@@ -82,7 +82,7 @@ function initDispatcher(width: number, height: number, options: RaytracerOptions
     spheres,
     planes,
     lights,
-    new Colour(221, 221, 221),
+    new Colour(40, 40, 40),
     options
   );
 
@@ -106,6 +106,8 @@ function getBenchmarkRenderOptions(multiCore: boolean) {
     maxDrawDistance: 1000,
     directMemoryTransfer: true,
     chunkSize: 0,
-    chunkAllocationMode: ChunkAllocationMode.SEQUENTIAL
+    chunkAllocationMode: ChunkAllocationMode.SEQUENTIAL,
+    chunkBorderColour: new Colour(220, 128, 128),
+    chunkUnrenderedColour: new Colour(120, 120, 120)
   }
 }

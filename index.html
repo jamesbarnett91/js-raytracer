@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Raytracer</title>
     <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
 
@@ -44,7 +44,7 @@
               </div>
               <div class="divider-vert"></div>
               <div class="column col-2">
-                <span>Render options</span>
+                <span class="render-option-heading">Render options</span>
                 <div class="form-group">
                   <label class="form-switch">
                     <input id="diffuse-toggle" type="checkbox" checked>
@@ -77,7 +77,7 @@
                 </div>
               </div>
               <div class="column col-3">
-                <span>Performance options</span>
+                <span class="render-option-heading">Performance options</span>
                 <div class="form-group">
                   <label class="form-switch">
                     <input id="direct-transfer" type="checkbox" checked>
@@ -165,15 +165,15 @@
                 </div>
                 <div class="columns">
                   <div class="column col-12" >
-                    <div class="h4">Score</div>
+                    <div class="h4 text-bold">Score</div>
                   </div>
                 </div>
-                <div class="columns">
-                  <div class="column col-6">
+                <div class="columns score-col">
+                  <div class="column col-6 text-bold">
                     <div>Multi-core</div>
                     <div id="multi-core-score" class="h1 loading-lg">-</div>
                   </div>
-                  <div class="column col-6">
+                  <div class="column col-6 text-bold">
                     <div>Single core</div>
                     <div id="single-core-score" class="h1 loading-lg">-</div>
                   </div>

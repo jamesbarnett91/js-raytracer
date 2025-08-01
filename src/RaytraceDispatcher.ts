@@ -150,21 +150,18 @@ export class RaytraceDispatcher {
 
     let borderWidth = 0;
     if (this.context.height <= 720) {
-      borderWidth = 2;
+      borderWidth = 4;
     } else {
-      borderWidth = 5;
+      borderWidth = 8;
     }
-
-    const borderColour = new Colour(220, 128, 128);
-    const unrenderedAreaColour = new Colour(160, 160, 160);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
 
         if (y < borderWidth || y >= (height-borderWidth) || x < borderWidth || x >= (width-borderWidth)) {
-          this.framebuffer.writePixelAt(chunk.xStart+x, chunk.yStart+y, borderColour);
+          this.framebuffer.writePixelAt(chunk.xStart+x, chunk.yStart+y, this.context.options.chunkBorderColour);
         } else {
-          this.framebuffer.writePixelAt(chunk.xStart+x, chunk.yStart+y, unrenderedAreaColour);
+          this.framebuffer.writePixelAt(chunk.xStart+x, chunk.yStart+y, this.context.options.chunkUnrenderedColour);
         }
 
       }

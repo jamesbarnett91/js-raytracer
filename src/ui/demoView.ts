@@ -68,7 +68,7 @@ function initDispatcher(width: number, height: number, options: RaytracerOptions
     spheres,
     planes,
     lights,
-    new Colour(221, 221, 221),
+    new Colour(40, 40, 40),
     options
   );
 
@@ -92,7 +92,9 @@ function parseOptions(): RaytracerOptions {
     maxDrawDistance: 1000,
     directMemoryTransfer: getInputElement('direct-transfer').checked,
     chunkSize: parseInt(getInputElement('chunk-size').value, 10),
-    chunkAllocationMode: getChunkAllocationMode()
+    chunkAllocationMode: getChunkAllocationMode(),
+    chunkBorderColour: new Colour(220, 128, 128),
+    chunkUnrenderedColour: new Colour(120, 120, 120)
   };
 }
 

@@ -1,0 +1,113 @@
+@font-face {
+  font-family: 'tamzen';
+  src: url('./tamzen-8-r.ttf') format('truetype');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'tamzen';
+  src: url('./tamzen-8-b.ttf') format('truetype');
+  font-weight: bold;
+}
+
+body {
+  font-size: 16px;
+  line-height: 16px;
+  background: #0a0a0a;
+  color: #bbb;
+  font-family: 'tamzen', monospace;
+}
+
+.tab {
+  border-bottom: .05rem solid #a3a3a3;
+  font-size: 1.1em;
+}
+
+.tab .tab-item a {
+  border-bottom: .3rem solid transparent;
+}
+
+.divider-vert::before {
+  border-left: .05rem solid #a3a3a3;
+}
+
+.form-select:not([multiple]):not([size]) {
+  background: #000 url("data:image/svg+xml;charset=utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%204%205'%3E%3Cpath%20fill='%23667189'%20d='M2%200L0%202h4zm0%205L0%203h4z'/%3E%3C/svg%3E") no-repeat right .35rem center/.4rem .5rem;
+  font-size: 1em;
+}
+
+a {
+  font-weight: bold;
+}
+
+p {
+  margin: 0 0 0.8rem;
+}
+
+#output-wrapper {
+  margin-top: 0.5em;
+}
+
+#render-output {
+  width: 100%;
+  height: 65vmin;
+  object-fit: contain;
+}
+
+.controls {
+  margin-top: 0.5em;
+}
+
+.slider {
+  margin-right: 0.5em;
+  width: 100%;
+}
+
+.nested-slider {
+  padding-left: 40px;
+}
+
+.console {
+  height: 120px;
+  padding: 0 0 0 1em;
+  white-space: pre-line;
+}
+
+#res-label {
+  padding-bottom: 4px;
+  padding-top: 0px;
+  margin-top: -1px;
+  font-size: 15px;
+}
+
+.divider-vert {
+  padding: 0;
+}
+
+.render-option-heading {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.form-label.label-sm {
+  font-size: 1em;
+}
+
+.btn.btn-link {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.code code {
+  background: #333;
+  color: #dd0;
+  padding: 1em;
+}
+
+.score-col {
+  line-height: 1.8em;
+}
+
+#threads-value {
+  background: #0a0a0a;
+}

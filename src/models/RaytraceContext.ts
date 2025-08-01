@@ -41,6 +41,8 @@ export interface RaytracerOptions {
   directMemoryTransfer: boolean;
   chunkSize: number;
   chunkAllocationMode: ChunkAllocationMode;
+  chunkBorderColour: Colour,
+  chunkUnrenderedColour: Colour
 }
 
 export enum ChunkAllocationMode {
